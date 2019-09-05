@@ -2,11 +2,11 @@ from Photovoltaics import *
 import pandas as pd
 import urllib.request
 import matplotlib.pyplot as plt
-
+# http://kw4h.org:8080/render/?target=scale(offset(05011.AD02.Pump_Current,-2.59),45)&format=csv&from=-70d&until=-54d
 import numpy as np
 if __name__ == "__main__":
 	print('run')
-	date_range = 2
+	date_range = 7
 	volt_url = 'http://kw4h.org:8080/render/?target=scale(05011.AD01.Pump_Voltage,801)&format=csv&from=-' + str(date_range) + 'd'
 	solar_url = 'http://kw4h.org:8080/render/?target=scale(05011.AD05.Pyranometer,400)&format=csv&from=-' + str(date_range) + 'd'
 	temp_url = 'http://kw4h.org:8080/render/?target=scale(05011.AD12.Temp_In_Water_Tank,1)&format=csv&from=-' + str(date_range) + 'd'
@@ -39,13 +39,16 @@ if __name__ == "__main__":
 	Icalc = np.zeros(shape=(N,1))
 	coef = np.zeros(shape=(N, 1))
 	line = np.zeros(shape=(N, 1))
+	current_cal = np.zeros(shape=(N, 1))
 	for i in range(N):
+		current_cal[i] = current[i] +0.2*(temp[i] - temp0)
 		Icalc[i] = pvarray.current(volts[i], 274.15 + temp[i], irradiance[i])
 		dT = temp[i]-temp0
-		try:
-			coef[i] = current[i]/(dasT[i]-temp0)
-		except:
-			coef[i] = NULL
+		#try:
+			#coef[i] = current[i]/(temp[i]-temp0)
+		#except:
+			#coef[i] = NULL
 		line[i] = -0.2
-	plt.plot(range(N), current, range(N), coef, range(N), line)
+	#plt.plot(range(N), current, range(N), coef, range(N), line)
+	plt.plot(range(N), Icalc, range(N), current_cal)
 	plt.show()
