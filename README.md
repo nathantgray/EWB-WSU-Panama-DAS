@@ -3,7 +3,10 @@ Functions for EWB-WSU Panama project DAS
 
 Things are a bit of a mess in the current state.
 
+The python file you may find the most interesting will be Photovoltaics.py. This is a class I created to model solar panels. I specifically tuned the parameters to match the I-V curve provided by the manufacuturer for our panels. The class provides methods for getting the voltage, current, or maximum power point for the modeled panels.
+
 I have included csv's with for each of the sensors I found usefull for the period of time after the first day of data to the last day that the voltage sensor was functioning. I chose to ignore the first day since not everything was completely up and running that day. However you may want to download that data as well. I have included the url's needed to download each of the sensors' data. Before using the URLs you will want to change the time period to match what you want. 
+
 ## To select the days you want data for:
 1. Count the number of days before today that you want the data to begin and replace the number 77 with your number.
 2. Count the number of days before today that you want the data to stop and replace the number 60 with your number.
