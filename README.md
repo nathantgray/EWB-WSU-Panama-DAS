@@ -42,7 +42,7 @@ You can use the irradiance data from the weather station to correct it, however 
 * Efficiency vs. flow rate
 
 
-## How Time stamps compare between different sources:
+## How times compare between different sources:
 
 PDT -             UTC-7    e.g. 4:00 AM 
 
