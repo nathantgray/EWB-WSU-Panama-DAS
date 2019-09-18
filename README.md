@@ -1,11 +1,11 @@
 # EWB-WSU-Panama-DAS
-Functions for EWB-WSU Panama project DAS
+Functions for EWB-WSU Panama project DAS (Python 3)
 
-Things are a bit of a mess in the current state.
+Things are a bit of a mess in the current state. I'm working on cleaning it up so it is usable and understandable.
 
 The python file you may find the most interesting will be Photovoltaics.py. This is a class I created to model solar panels. I specifically tuned the parameters to match the I-V curve provided by the manufacuturer for our panels. The class provides methods for getting the voltage, current, or maximum power point for the modeled panels.
 
-I have included csv's with for each of the sensors I found usefull for the period of time after the first day of data to the last day that the voltage sensor was functioning. I chose to ignore the first day since not everything was completely up and running that day. However you may want to download that data as well. I have included the url's needed to download each of the sensors' data. Before using the URLs you will want to change the time period to match what you want. 
+I have included CSVs with data for each of the sensors I found useful for the period of time after the first day of data to the last day that the voltage sensor was functioning. I chose to ignore the first day since not everything was completely up and running that day. However you may want to download that data as well. I have included the URLs needed to download each of the sensors' data. Before using the URLs you will want to change the time period to match what you want. 
 
 ## To select the days you want data for:
 1. Count the number of days before today that you want the data to begin and replace the number 77 with your number.
@@ -17,10 +17,10 @@ Current: http://kw4h.org:8080/render/?target=scale(offset(05011.AD02.Pump_Curren
 9V_CT_Supply: http://kw4h.org:8080/render/?target=scale(05011.AD03.9V_CT_Supply,1)&format=csv&from=-77d&until=-60d<br />
 Data_Logger_DC_Bus: http://kw4h.org:8080/render/?target=scale(05011.AD04.Data_Logger_DC_Bus,4)&format=csv&from=-77d&until=-60d<br />
 Pyranometer: http://kw4h.org:8080/render/?target=scale(05011.AD05.Pyranometer,400)&format=csv&from=-77d&until=-60d<br />
-Outside Temperature: http://kw4h.org:8080/render/?target=scale(05011.AD12.*,1)&format=csv&from=-77d&until=-60d<br />
-DAS Temperature: http://kw4h.org:8080/render/?target=scale(05011.AD11.*,1)&format=csv&from=-77d&until=-60d<br />
-Total Gallons of Water Into Tanks: http://kw4h.org:8080/render/?target=05011.PU03.*&format=csv&from=-77d&until=-60d<br />
-Total Gallons of Water Out of Tanks: http://kw4h.org:8080/render/?target=05011.PU04.*&format=csv&from=-77d&until=-60d<br />
+Outside Temperature: http://kw4h.org:8080/render/?target=scale(05011.AD12.\*,1)&format=csv&from=-77d&until=-60d<br />
+DAS Temperature: http://kw4h.org:8080/render/?target=scale(05011.AD11.\*,1)&format=csv&from=-77d&until=-60d<br />
+Total Gallons of Water Into Tanks: http://kw4h.org:8080/render/?target=05011.PU03.\*&format=csv&from=-77d&until=-60d<br />
+Total Gallons of Water Out of Tanks: http://kw4h.org:8080/render/?target=05011.PU04.\*&format=csv&from=-77d&until=-60d<br />
 
 The python file you may find the most interesting will be Photovoltaics.py. This is a class I created to model solar panels. I specifically tuned the parameters to match the I-V curve provided by the manufacuturer for our panels. The class provides methods for getting the voltage, current, or maximum power point for the modeled panels.
 
@@ -28,9 +28,10 @@ The python file you may find the most interesting will be Photovoltaics.py. This
 
 * The raw current data is highly dependent on the temperature of the sensor. 
 Use this equation to correct it;
+```{python}
 temp0 = 25
 current_cal = current + 0.2*(temp - temp0)
-
+```
 * The pyranometer data clips irradiance data to no more than 730 W/m^2.
 You can use the irradiance data from the weather station to correct it, however this is made difficult because the weather station data is spaced out by 15 minutes.
 
@@ -47,10 +48,12 @@ You can use the irradiance data from the weather station to correct it, however 
 
 ## How times compare between different sources:
 
-PDT -             UTC-7    e.g. 4:00 AM 
+PDT ------------------- UTC-7 ...e.g. 4:00 AM 
 
-Panama time -     UTC-5    e.g. 6:00 AM 
+Panama time -------- UTC-5    ...e.g. 6:00 AM 
 
-Grafana graphs -  UTC-9    e.g. 2:00 AM 
+Grafana graphs ----- UTC-9  ...e.g. 2:00 AM 
 
-CSVs downloaded - UTC-0    e.g. 11:00 AM 
+CSVs downloaded -- UTC-0    ...e.g. 11:00 AM 
+
+
