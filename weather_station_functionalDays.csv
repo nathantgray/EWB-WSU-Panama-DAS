@@ -1,6 +1,6 @@
 06-01224,Port 1,,,,,,,,,,,,,,,Port 7,,Port 8,
 # Record: 1344,ATMOS 41 All-in-one Weather Station,,,,,,,,,,,,,,,Battery,,Barometer,
-Timestamp,W/m? Solar Radiation,mm Precipitation, Lightning Activity,km Lightning Distance,¡ Wind Direction,m/s Wind Speed,m/s Gust Speed,¡C Air Temperature,kPa Vapor Pressure,kPa Atmospheric Pressure,¡ X-axis Level,¡ Y-axis Level,mm/h Max Precip Rate,¡C RH Sensor Temp,kPa VPD,% Battery Percent,mV Battery Voltage,kPa Reference Pressure,¡C Logger Temperature
+Timestamp,W/m? Solar Radiation,mm Precipitation, Lightning Activity,km Lightning Distance,­ Wind Direction,m/s Wind Speed,m/s Gust Speed,­C Air Temperature,kPa Vapor Pressure,kPa Atmospheric Pressure,­ X-axis Level,­ Y-axis Level,mm/h Max Precip Rate,­C RH Sensor Temp,kPa VPD,% Battery Percent,mV Battery Voltage,kPa Reference Pressure,­C Logger Temperature
 6/28/2019 0:00,0,0,0,0,93,0.59,1.24,23.3,2.8,96.68,-0.4,0.9,0,22.9,0,100,6543,96.68,22.2
 6/28/2019 0:15,0,0,0,0,92,0.72,2.07,23.7,2.9,96.66,-0.3,0.9,0,23.2,0,100,6548,96.66,22.8
 6/28/2019 0:30,0,0,0,0,92,0.62,1.37,23.9,2.87,96.64,-0.3,0.9,0,23.5,0,100,6526,96.64,23.1
