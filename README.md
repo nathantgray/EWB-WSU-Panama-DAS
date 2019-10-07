@@ -37,8 +37,8 @@ You can use the irradiance data from the weather station to correct it, however 
 
 ## Questions and ideas I have for analysing data:
 
-* (done) Use Pyranometer and Voltage to calculated current and compare to measured
-* (done partial) Calculate water level in tanks and calculated how much overflows
+* (done) Use Pyranometer and Voltage to calculate current and compare to measured
+* (done partial) Calculate water level in tanks and calculate how much overflows
 * (done partial) Track daily water use
 * (Started) Compare pump output with Grundfos data for the 11-SQF-2
 * Calculate if there is excess power available that could be used for other projects in the future such as a cellphone charging station

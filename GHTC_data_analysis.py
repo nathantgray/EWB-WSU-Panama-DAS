@@ -19,6 +19,7 @@ das_df = das_df.assign(power=das_df['current_cal']*das_df['voltage'])
 # Calculate Flow Rate
 das_df['gal_in'].interpolate(method='time', inplace=True)
 das_df = das_df.assign(in_rate=das_df['gal_in'].diff())
+das_df = das_df.assign(out_rate=das_df['gal_out'].diff())
 
 # Calculate W/GPM
 das_df = das_df.assign(power_to_flowrate=das_df['power']/das_df['in_rate'])
@@ -32,8 +33,20 @@ w_df.set_index('time', inplace=True)
 print(w_df.head())
 
 # Synchronize das with weather data
+# w_df.plot(kind='scatter', y='W/m^2 Solar Radiation')
 w_df = w_df.resample('1Min').interpolate(method='spline', order=3)
-
+print(w_df.head())
+w_df.plot(kind='line', y='W/m^2 Solar Radiation')
+df=das_df.join(w_df, how='outer')
+# df = df.interpolate(method='time')
+# das_df.assign(w_flux=w_df['W/m^2 Solar Radiation'])
+# w_df.apply(lambda x: plt.scatter(x.index, x, c='g'))
+df.plot.scatter(x='flux', y='W/m^2 Solar Radiation')
+df.plot.scatter(x='W/m^2 Solar Radiation', y='power')
+df.plot.line(y='power')
+df.plot.scatter(x='flux', y='current')
+df.plot.scatter(x='flux', y='voltage')
+df.to_csv('consolidated_data.csv')
 plt.show()
 #das_df = das_df.assign(in_rate=das_df[])
 

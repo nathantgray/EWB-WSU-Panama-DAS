@@ -1,4 +1,4 @@
-from Photovoltaics import *
+qfrom Photovoltaics import *
 import pandas as pd
 import urllib.request
 import matplotlib.pyplot as plt
