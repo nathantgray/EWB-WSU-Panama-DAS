@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+import numpy as np
 
 das_file_name = "DAS_functionalDays.csv"
 weather_file_name = "weather_station_6-28_through_7-11.csv"
@@ -70,15 +71,20 @@ df_dwn = das_df.join(w_df, how='right')
 # plt.ylabel('Pump Flow Rate (gpm)')
 # plt.xlabel('Solar Power (W)')
 # plt.title('Flow Rate vs. Power')
-ax = df.plot.scatter(x='pump_power', y='in_rate', xlim=[0, 1300], ylim=[0, 15])
+df_2 = df.loc[df['pump_power'] > 30]
+df_2 = df_2.loc[0 < df['in_rate']]
+df_2 = df_2.loc[df['in_rate'] < 15]
+ax = df_2.plot.scatter(x='pump_power', y='in_rate', xlim=[0, 1300], ylim=[0, 15])
 plt.ylabel('Pump Flow Rate (gpm)')
 plt.xlabel('Pump Power (W)')
 plt.title('Flow Rate vs. Power')
-x = df['pump_power']
-x2 = x**(1/2)
-X = pd.DataFrame(data={'x':x, 'x2':x2})
+x = df_2['pump_power']
+xroot = x**(1/2)
+x2 = x**2
+x3 = x**3
+X = pd.DataFrame(data={'x':x, 'xroot':xroot})
 X = sm.add_constant(X)
-y = df['in_rate']
+y = df_2['in_rate']
 model = sm.OLS(y, X, missing='drop').fit()
 ax.plot(model.model.exog[:, 1], model.fittedvalues, 'r.')
 print(model.summary())
