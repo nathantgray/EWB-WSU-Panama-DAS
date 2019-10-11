@@ -7,10 +7,10 @@ if __name__ == "__main__":
 	pv = Photovoltaics(38.7, 9.42, 32.1, 8.92, 285, 1.00, 60)
 	pvarray = Photovoltaics(5*38.7, 9.42, 5*32.1, 8.92, 5*285, 1.00, 60*5)
 	pvarray.Rs = pvarray.Rs #+ 2/300 # add 2 ohms for line losses (1ohm/1000ft for 2 wires)
-	temp = 274.15 + 28.25
-	flux = 586.8
-	v = 143.379
-	i = 4.68
+	temp = 273.15 + 27
+	flux = 672
+	v_meas = 137.77
+	i_meas = 5.94
 	#print(pvarray.current(pvarray.voc, 300, 1000))
 	#print(pvarray.current(pvarray.vmp, 300, 1000))
 	varray = np.linspace(0, pvarray.voc, 100)
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 	imp_model = I[np.argmax(p)]
 	print(vmp_model)
 	plt.plot(vmp_model, imp_model, label='MPP', marker='o')
-	plt.plot(v, i, label='Operating Point', marker='x')
+	plt.plot(v_meas, i_meas, label='Operating Point', marker='x')
 	#plt.plot(139.374,7.560, label='actual', marker='x')
 	#plt.plot(139.374,7.560, label='actual', marker='x')
 	#plt.plot(139.374,7.2, label='actual', marker='x')

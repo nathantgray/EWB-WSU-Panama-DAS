@@ -9,6 +9,8 @@ library(tidyr)
 library(dplyr)
 library(readr)
 library(ggplot2)
+library(corrplot)
+library(viridis)
 ```
 
 ```{r}
@@ -20,17 +22,20 @@ attach(consolidated_data)
 
 ```{r}
 result <- consolidated_data %>%
-  dplyr::select(current_cal, voltage, flux, temp, gal_in, gal_out, power, in_rate, out_rate, pump_voltage, vdrop, pump_power, power_loss, 'W/m^2 Solar Radiation') %>%
+  dplyr::select(current_raw, current_cal, voltage, flux, temp, in_rate, out_rate, power, in_rate, out_rate, pump_voltage, vdrop, pump_power, power_loss, 'W/m^2 Solar Radiation') %>%
   na.omit %>%
-  cor() %>%
-  round(3)
+  cor()%>%
+  corrplot(method="circle", order='hclust')
 result
 ```
 
 ```{r}
-plot(current_cal)
+dfpv <- consolidated_data%>%
+  select(current_cal, voltage, flux, temp)%>%
+  dplyr::filter(flux>672 & flux<673 & current_cal>1)
+
 outliers <- which(current_cal < -1)
-current_cal[outliers] <- 0
-plot(voltage, current_cal, col=scale('W/m^2 Solar Radiation')*2+3)
+dfpv$current_cal[outliers] <- 0
+ggplot(dfpv, aes(voltage, current_cal, col=temp)) + geom_point() + scale_color_viridis()
 ```
 
