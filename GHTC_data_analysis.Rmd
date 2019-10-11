@@ -1,0 +1,36 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(MASS)
+library(ISLR)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+```
+
+```{r}
+
+consolidated_data <- read_csv("consolidated_data.csv")
+head(consolidated_data)
+attach(consolidated_data)
+```
+
+```{r}
+result <- consolidated_data %>%
+  dplyr::select(current_cal, voltage, flux, temp, gal_in, gal_out, power, in_rate, out_rate, pump_voltage, vdrop, pump_power, power_loss, 'W/m^2 Solar Radiation') %>%
+  na.omit %>%
+  cor() %>%
+  round(3)
+result
+```
+
+```{r}
+plot(current_cal)
+outliers <- which(current_cal < -1)
+current_cal[outliers] <- 0
+plot(voltage, current_cal, col=scale('W/m^2 Solar Radiation')*2+3)
+```
+
