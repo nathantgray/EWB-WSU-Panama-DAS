@@ -1,11 +1,11 @@
 ---
-title: "Natalie_GHTC_data_analysis"
+title: "Natalie_GHTC_New"
 author: "Natalie Smith-Gray"
 date: "10/13/2019"
 output: pdf_document
 ---
 
-Testing
+My Libraries
 ```{r}
 library(MASS)
 library(ISLR)
@@ -17,6 +17,7 @@ library(corrplot)
 library(viridis)
 ```
 
+Upload the data
 ```{r}
 
 consolidated_data <- read_csv("consolidated_data.csv")
@@ -24,5 +25,88 @@ head(consolidated_data)
 attach(consolidated_data)
 ```
 
+Natalie's Goals:  
+I am going to look at:  
+* Water into tank vs water out of the tank
+* power vs water out of tank
+* fux vs water out of tank
+* temperature vs water out of tank
+* wind speed vs temperature vs water out of tank
+
+Therefore I need to get the following data from the dataframe:
+* gal_in
+* gal_out
+* rate_in
+* rate_out
+* power
+* pump_power?
+* flux
+* temp
+**** wind_speed
+
+```{r}
+natalie_values <- consolidated_data %>%
+  dplyr::select(gal_in, gal_out, in_rate, out_rate, power, pump_power, flux, temp, 'm/s Wind Speed') %>%
+  na.omit() %>%
+  cor()
+round(natalie_values,3)
+corrplot(natalie_values, order='hclust')
+```
+
+First lets look at water into tank vs water out of the tank
+```{r}
+time_series <- consolidated_data %>%
+  dyplyr::select(time, out_rate, in_rate) %>%
+  filter(time < )
+plot(consolidated_data$time, 
+     consolidated_data$in_rate, col = "green")
+lines(consolidated_data$time,
+      consolidated_data$out_rate, col = "red")
+```
+Now look at * fux vs water out of tank
+```{r}
+flux_out_rate <- consolidated_data %>%
+  select(flux, out_rate) %>%
+  na.omit()
+plot(flux_out_rate)
+lmr <- lm(out_rate ~ flux, flux*temp, data = consolidated_data)
+summary(lmr)
+plot(lmr)
+```
+Figure out the total daily use of water.
+```{r}
+
+```
 
 
+```{r}
+flux_temp <- consolidated_data %>%
+  select(flux, temp, out_rate) %>%
+  na.omit()
+plot(flux_temp)
+plot(temp,out_rate)
+#lmr <- lm(out_rate ~ flux, data = consolidated_data)
+#plot(lmr)
+dfpv <- consolidated_data%>%
+  select(out_rate, flux, temp)
+ggplot(dfpv, aes(temp, out_rate, col=flux)) + geom_point() + scale_color_viridis()
+```
+
+
+```{r}
+result <- consolidated_data %>%
+  dplyr::select(current_raw, current_cal, voltage, flux, temp, in_rate, out_rate, power, in_rate, out_rate, pump_voltage, vdrop, pump_power, power_loss, 'W/m^2 Solar Radiation') %>%
+  na.omit %>%
+  cor()%>%
+  corrplot(method="circle", order='hclust')
+result
+```
+
+```{r}
+dfpv <- consolidated_data%>%
+  select(current_cal, voltage, flux, temp)
+
+outliers <- which(dfpv$current_cal < -1)
+dfpv$current_cal[outliers] <- 0
+ggplot(dfpv, aes(voltage, current_cal, col=flux)) + geom_point() + scale_color_viridis()
+```
