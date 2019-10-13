@@ -31,11 +31,64 @@ result
 
 ```{r}
 dfpv <- consolidated_data%>%
-  select(current_cal, voltage, flux, temp)%>%
-  dplyr::filter(flux>672 & flux<673 & current_cal>1)
+  select(current_cal, voltage, flux, temp)
 
-outliers <- which(current_cal < -1)
+outliers <- which(dfpv$current_cal < -1)
 dfpv$current_cal[outliers] <- 0
-ggplot(dfpv, aes(voltage, current_cal, col=temp)) + geom_point() + scale_color_viridis()
+ggplot(dfpv, aes(voltage, current_cal, col=flux)) + geom_point() + scale_color_viridis()
+```
+```{r}
+hist(power_loss, breaks = 40000, xlim=c(0, 160), ylim=c(0, 150))
+```
+```{r}
+plot(power, power_loss, ylim=c(0, 160))
+```
+
+```{r}
+plot(power, pump_power, ylim=c(-100, 1300))
+fit = lm(pump_power~power + I(power^(1/2)))
+summary(fit)
+
+
+mean(pump_power/power, na.rm = TRUE)
+```
+```{r}
+dfp <- consolidated_data%>%
+  select(current_cal, voltage, vdrop, flux, temp, power, pump_power, in_rate)%>%
+  filter(pump_power>600)
+
+outliers <- which(dfp$current_cal < -1)
+dfp$current_cal[outliers] <- 0
+
+
+plot(dfp$power, dfp$pump_power)
+fit = lm(dfp$pump_power~dfp$power+0)
+summary(fit)
+
+mean(dfp$pump_power/dfp$power, na.rm = TRUE)
+mean(dfp$power, na.rm = TRUE)
+mean(dfp$pump_power, na.rm = TRUE)
+
+# Create the function.
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+getmode(dfp$power)
+getmode(dfp$pump_power)
+```
+
+```{r}
+df_flow <- consolidated_data%>%
+  select(current_cal, voltage, vdrop, flux, temp, power, pump_power, in_rate)%>%
+  filter(pump_power>30 & in_rate > 0 & in_rate < 14)
+plot(df_flow$pump_power, df_flow$in_rate)
+
+pumpfit = lm(in_rate ~ pump_power + I(pump_power^(1/2)), data=df_flow)
+plot(pumpfit)
+summary(pumpfit)
+
+plot(df_flow$pump_power, df_flow$in_rate, data=df_flow)
+abline(pumpfit)
 ```
 
