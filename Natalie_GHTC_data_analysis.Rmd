@@ -75,7 +75,58 @@ plot(lmr)
 ```
 Figure out the total daily use of water.
 ```{r}
+water <- consolidated_data %>% 
+  separate(time, c("date", "min"), sep = " ") %>%
+  group_by(date) %>%
+  mutate(sum_water_out = sum(out_rate, na.rm = TRUE)) %>%
+  mutate(sum_water_in = sum(in_rate, na.rm = TRUE)) %>%
+  filter(date < as.Date("2019-07-12")) %>%
+  filter(date > as.Date("2019-06-27"))
 
+#plot(water$date, water$sum_water_in)
+ggplot(data = water, aes(x = date, y = sum_water_out)) +
+  geom_point() +
+  labs(x = "Date",
+    y = "Water Used (gal)",
+    title = "Amount of Water Used per Day") + theme(axis.text.x = element_text(angle = 45))
+wawa <- water %>%
+  select(temp, flux, sum_water_in, sum_water_out, date) %>%
+  na.omit()
+
+ggplot(wawa,)+ geom_point(aes(date, sum_water_in, col= "Water In")) + geom_point(aes(date, sum_water_out, col= "Water Out")) + theme(axis.text.x = element_text(angle = 45)) + labs(x = "Date", y = "Water Used (gal)", title = "Amount of Water Used per Day") + theme(plot.title = element_text(hjust = 0.5)) + theme(legend.title = element_blank())
+
+hist(wawa$sum_water_in)
+hist(wawa$sum_water_out)
+pow_lux <- water %>%
+  select(flux, power, temp) %>%
+  filter(flux < 700 & flux > 0 & power > 0)
+
+lem <- lm(power ~ flux, data = pow_lux)
+summary(lem)
+plot(pow_lux$flux, pow_lux$power)
+abline(lem)
+
+ggplot(pow_lux,) + geom_point(aes(flux, power, col=temp)) + scale_color_viridis() + labs(x = "Flux (W/m^2)", y = "Power (W)", title = "Solar Power Generation") +  theme(plot.title = element_text(hjust = 0.5)) + geom_abline(slope = lem$coefficients[2], intercept = lem$coefficients[1]) + geom_text(aes(3, 40, label = paste("Adj R2 = ", adj.r.squared, "\n", "Intercept =",intercept, "\n", "Slope =", slope, "\n", "P =", pvalue)))
+
+
+#https://winvector.github.io/WVPlots/reference/ScatterHist.html
+
+set.seed(34903490)
+x = water$in_rate
+y = water$flux
+frm = data.frame(x=x,y=y)
+WVPlots::ScatterHist(frm, "x", "y",
+  title= "Example Fit",
+  smoothmethod = "gam",
+  contour = TRUE)
+######
+testing <- water %>%
+  select(power, current)
+plot(water)
+#plot(consolidated_data$time, 
+     #consolidated_data$in_rate, col = "green")
+#lines(consolidated_data$time,
+      #consolidated_data$out_rate, col = "red")
 ```
 
 
@@ -90,6 +141,7 @@ plot(temp,out_rate)
 dfpv <- consolidated_data%>%
   select(out_rate, flux, temp)
 ggplot(dfpv, aes(temp, out_rate, col=flux)) + geom_point() + scale_color_viridis()
+#ggplot(wawa, aes(temp, sum_water_out, col=flux)) + geom_point() + scale_color_viridis()
 ```
 
 
