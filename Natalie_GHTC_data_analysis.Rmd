@@ -15,6 +15,7 @@ library(readr)
 library(ggplot2)
 library(corrplot)
 library(viridis)
+library(WVPlots)
 ```
 
 Upload the data
@@ -98,22 +99,27 @@ ggplot(wawa,)+ geom_point(aes(date, sum_water_in, col= "Water In")) + geom_point
 hist(wawa$sum_water_in)
 hist(wawa$sum_water_out)
 pow_lux <- water %>%
-  select(flux, power, temp) %>%
-  filter(flux < 700 & flux > 0 & power > 0)
+  select(flux, power, temp, in_rate) %>%
+  filter(flux < 700 & flux > 0 & power > 0 & in_rate > 0)
 
 lem <- lm(power ~ flux, data = pow_lux)
 summary(lem)
 plot(pow_lux$flux, pow_lux$power)
 abline(lem)
 
-ggplot(pow_lux,) + geom_point(aes(flux, power, col=temp)) + scale_color_viridis() + labs(x = "Flux (W/m^2)", y = "Power (W)", title = "Solar Power Generation") +  theme(plot.title = element_text(hjust = 0.5)) + geom_abline(slope = lem$coefficients[2], intercept = lem$coefficients[1]) + geom_text(aes(3, 40, label = paste("Adj R2 = ", adj.r.squared, "\n", "Intercept =",intercept, "\n", "Slope =", slope, "\n", "P =", pvalue)))
+intercept = lem[["coefficients"]][["(Intercept)"]]
+slope = lem[["coefficients"]][["flux"]]
+sum_info <- summary(lem)
 
+ggplot(pow_lux,) + geom_point(aes(flux, power, col=temp)) + scale_color_viridis() + labs(x = "Flux (W/m^2)", y = "Power (W)", title = "Solar Power Generation w/ Pump Running") + theme(plot.title = element_text(hjust = 0.5)) + geom_abline(slope = lem$coefficients[2], intercept = lem$coefficients[1]) + geom_text(aes(200, 750, label = paste("y =",slope, "x", " + ", intercept)))
+
+plot(lem)
 
 #https://winvector.github.io/WVPlots/reference/ScatterHist.html
 
 set.seed(34903490)
-x = water$in_rate
-y = water$flux
+y = water$in_rate
+x = water$flux
 frm = data.frame(x=x,y=y)
 WVPlots::ScatterHist(frm, "x", "y",
   title= "Example Fit",

@@ -11,6 +11,7 @@ library(readr)
 library(ggplot2)
 library(corrplot)
 library(viridis)
+library(WVPlots)
 ```
 
 ```{r}
@@ -37,5 +38,72 @@ dfpv <- consolidated_data%>%
 outliers <- which(current_cal < -1)
 dfpv$current_cal[outliers] <- 0
 ggplot(dfpv, aes(voltage, current_cal, col=temp)) + geom_point() + scale_color_viridis()
+```
+
+Figure out the total daily use of water.
+```{r}
+water <- consolidated_data %>% 
+  separate(time, c("date", "min"), sep = " ") %>%
+  group_by(date) %>%
+  mutate(sum_water_out = sum(out_rate, na.rm = TRUE)) %>%
+  mutate(sum_water_in = sum(in_rate, na.rm = TRUE)) %>%
+  filter(date < as.Date("2019-07-12")) %>%
+  filter(date > as.Date("2019-06-27"))
+```
+```{r}
+#plot(water$date, water$sum_water_in)
+ggplot(data = water, aes(x = date, y = sum_water_out)) +
+  geom_point() +
+  labs(x = "Date",
+    y = "Water Used (gal)",
+    title = "Amount of Water Used per Day") + theme(axis.text.x = element_text(angle = 45))
+wawa <- water %>%
+  select(temp, flux, sum_water_in, sum_water_out, date) %>%
+  na.omit()
+
+ggplot(wawa,) + 
+  geom_segment(aes(x=date, xend=date, yend=sum_water_out, y=0), color='cyan4', size=4) + 
+  geom_segment(aes(x=date, xend=date, yend=sum_water_in, y=sum_water_out), color='dark green', size=4) + 
+  geom_point(aes(x=date, y=sum_water_in, color='Water Pumped'), size=3) + 
+  geom_point(aes(x=date, y=sum_water_out, color="Water Used"), size=3) + 
+  theme(axis.text.x = element_text(angle = 45)) + 
+  labs(x = "Date", y = "Water Volume (gal)", title = "Water Pumped and Water Used Each Day") + 
+  theme(plot.title = element_text(hjust = 0.5), legend.justification = 'right') + theme(legend.title = element_blank())
+```
+```{r}
+hist(wawa$sum_water_in)
+hist(wawa$sum_water_out)
+pow_lux <- water %>%
+  select(flux, power, temp, in_rate) %>%
+  filter(flux < 700 & flux > 0 & power > 0 & in_rate > 0)
+
+lem <- lm(power ~ flux, data = pow_lux)
+summary(lem)
+plot(pow_lux$flux, pow_lux$power)
+abline(lem)
+
+intercept = lem[["coefficients"]][["(Intercept)"]]
+slope = lem[["coefficients"]][["flux"]]
+
+ggplot(pow_lux,) + geom_point(aes(flux, power, col=temp)) + scale_color_viridis() + labs(x = "Flux (W/m^2)", y = "Power (W)", title = "Solar Power Generation w/ Pump Running") + theme(plot.title = element_text(hjust = 0.5)) + geom_abline(slope = lem$coefficients[2], intercept = lem$coefficients[1]) + geom_text(aes(200, 750, label = paste("y =",slope, "x", " + ", intercept)))
+
+plot(lem)
+
+#https://winvector.github.io/WVPlots/reference/ScatterHist.html
+
+set.seed(34903490)
+y = water$in_rate
+x = water$flux
+frm = data.frame(x=x,y=y)
+WVPlots::ScatterHist(frm, "x", "y",
+  title= "Example Fit",
+  smoothmethod = "gam",
+  contour = TRUE)
+######
+
+#plot(consolidated_data$time, 
+     #consolidated_data$in_rate, col = "green")
+#lines(consolidated_data$time,
+      #consolidated_data$out_rate, col = "red")
 ```
 
