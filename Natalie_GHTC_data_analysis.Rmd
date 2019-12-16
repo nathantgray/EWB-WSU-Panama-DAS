@@ -168,3 +168,31 @@ outliers <- which(dfpv$current_cal < -1)
 dfpv$current_cal[outliers] <- 0
 ggplot(dfpv, aes(voltage, current_cal, col=flux)) + geom_point() + scale_color_viridis()
 ```
+
+# Wind Power
+The objective of this section, is to explore if wind power is a feasible option for future projects in Panama. Some assumptions were made in the process and are labeled in the code below.
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+install.packages
+# P = ?
+rho = 1.225 # density of the air in kg/m^3 at sea level and 15 degrees C
+pi = 3.1415926
+d = 0.5 # wind mil diameter (m)
+v <- consolidated_data$`m/s Wind Speed` # wind velocity
+Wind_Pwr = (rho*pi*(d^2)*(v^3))/8
+ 
+solar <- consolidated_data %>%
+  select(time, power) %>%
+  separate(time, c("date", "min"), sep = " ") %>%
+  group_by(date) %>%
+  mutate(solar_Whr = power*1/60) %>%
+  mutate(energy_per_day = sum(solar_Whr, na.rm = TRUE)) %>%
+  filter(date < as.Date("2019-07-12")) %>%
+  filter(date > as.Date("2019-06-27"))
+ 
+mean(solar$energy_per_day, na.rm = TRUE)
+ 
+ggplot(solar,)+ geom_point(aes(date, energy_per_day, col = "Solar")) + theme(axis.text.x = element_text(angle = 45)) + labs(x = "Date", y = "Energy (Wh)", title = "Energy Per Day") + theme(plot.title = element_text(hjust = 0.5)) + theme(legend.title = element_blank())
+```

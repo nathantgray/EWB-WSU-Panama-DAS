@@ -18,7 +18,6 @@ library(WVPlots)
 
 consolidated_data <- read_csv("consolidated_data.csv")
 head(consolidated_data)
-attach(consolidated_data)
 ```
 
 ```{r}
@@ -28,9 +27,28 @@ result <- consolidated_data %>%
   cor()%>%
   corrplot(method="circle", order='hclust')
 result
+
+eda <- consolidated_data %>%
+  dplyr::select(current_raw, current_cal, voltage, flux, temp, in_rate, out_rate, in_rate, out_rate)%>%
+  filter(current_cal > -1, flux > 0, voltage > 0, flux < 720)
+
+plot(eda)
+```
+```{r}
+# Calibration of Current (not actually used)
+df_cal <- consolidated_data %>%
+  dplyr::select(current_raw, temp, voltage)%>%
+  filter(current_raw > -1, voltage < 0.5, current_raw < 0.7)%>%
+  mutate(dt = 27 - temp + 0.2868533)
+  
+cal_fit = lm(current_raw ~ dt, df_cal)
+plot(cal_fit)
+plot(df_cal$current_raw, df_cal$dt)
 ```
 
+
 ```{r}
+# Power Loss in wire versus power generated
 dfpv <- consolidated_data%>%
   select(current_cal, voltage, flux, temp)
 
@@ -38,6 +56,19 @@ outliers <- which(dfpv$current_cal < -1)
 dfpv$current_cal[outliers] <- 0
 ggplot(dfpv, aes(voltage, current_cal, col=flux)) + geom_point() + scale_color_viridis()
 ```
+```{r}
+# This chunck makes a model for the pump curve. We did not use this for the project since it produced bad results.
+df_pump <- consolidated_data%>%
+  select(current_cal, voltage, flux, temp, in_rate, pump_power, power, power_loss)%>%
+  filter(pump_power > 20 & in_rate > 0 & in_rate < 14)
+
+ggplot(df_pump, aes(pump_power, in_rate, col=temp)) + geom_point() + scale_color_viridis() + stat_smooth(method='lm', formula=y~poly(x, 3))
+ggplot(df_pump,aes(x=power, y=in_rate )) + geom_point(size=0.25) + geom_density_2d() + labs(x="Power", y="Pump Rate", title="Pump Curve") +  theme(plot.title = element_text(hjust = 0.5)) + stat_smooth(method='lm', formula=y~poly(x, 3))
+pump_curve_model = lm(df_pump$in_rate~poly(df_pump$pump_power, 3))
+summary(pump_curve_model)
+plot(pump_curve_model)
+```
+
 ```{r}
 hist(power_loss, breaks = 40000, xlim=c(0, 160), ylim=c(0, 150))
 ```
@@ -55,14 +86,14 @@ mean(pump_power/power, na.rm = TRUE)
 ```
 ```{r}
 dfp <- consolidated_data%>%
-  select(current_cal, voltage, vdrop, flux, temp, power, pump_power, in_rate)%>%
-  filter(pump_power>600)
+  select(current_cal, voltage, vdrop, flux, temp, power, pump_power, in_rate, power_loss)%>%
+  filter(current_cal > 0)
 
 outliers <- which(dfp$current_cal < -1)
 dfp$current_cal[outliers] <- 0
 
 
-plot(dfp$power, dfp$pump_power)
+plot(dfp$power, dfp$power_loss)
 fit = lm(dfp$pump_power~dfp$power+0)
 summary(fit)
 
@@ -80,6 +111,7 @@ getmode(dfp$pump_power)
 ```
 
 ```{r}
+# Data fit for pump curve. Creates equation used for project.
 df_flow <- consolidated_data%>%
   select(current_cal, voltage, vdrop, flux, temp, power, pump_power, in_rate)%>%
   filter(pump_power>30 & in_rate > 0 & in_rate < 14)
@@ -88,9 +120,7 @@ plot(df_flow$pump_power, df_flow$in_rate)
 pumpfit = lm(in_rate ~ pump_power + I(pump_power^(1/2)), data=df_flow)
 plot(pumpfit)
 summary(pumpfit)
-
-plot(df_flow$pump_power, df_flow$in_rate, data=df_flow)
-abline(pumpfit)
+# -5.2733237 + -0.0066150(pump_power) + 0.6990381(pump_power)^(1/2)
 ```
 
 Figure out the total daily use of water.
@@ -110,6 +140,7 @@ ggplot(data = water, aes(x = date, y = sum_water_out)) +
   labs(x = "Date",
     y = "Water Used (gal)",
     title = "Amount of Water Used per Day") + theme(axis.text.x = element_text(angle = 45))
+
 wawa <- water %>%
   select(temp, flux, sum_water_in, sum_water_out, date) %>%
   na.omit()
@@ -126,22 +157,29 @@ ggplot(wawa,) +
 ```{r}
 hist(wawa$sum_water_in)
 hist(wawa$sum_water_out)
+```
+Power vs Solar Irradiation
+```{r}
 pow_lux <- water %>%
   select(flux, power, temp, in_rate) %>%
-  filter(flux < 700 & flux > 0 & power > 0 & in_rate > 0)
+  filter(flux < 718 & flux > 0 & power > 30 & in_rate > 0)
 
 lem <- lm(power ~ flux, data = pow_lux)
 summary(lem)
-plot(pow_lux$flux, pow_lux$power)
-abline(lem)
 
 intercept = lem[["coefficients"]][["(Intercept)"]]
 slope = lem[["coefficients"]][["flux"]]
 
-ggplot(pow_lux,) + geom_point(aes(flux, power, col=temp)) + scale_color_viridis() + labs(x = "Flux (W/m^2)", y = "Power (W)", title = "Solar Power Generation w/ Pump Running") + theme(plot.title = element_text(hjust = 0.5)) + geom_abline(slope = lem$coefficients[2], intercept = lem$coefficients[1]) + geom_text(aes(200, 750, label = paste("y =",slope, "x", " + ", intercept)))
+ggplot(pow_lux,) + 
+  geom_point(aes(flux, power), size=0.25, alpha=0.3) + 
+  labs(x = "Flux (W/m^2)", y = "Power (W)", title = "Solar Power Generation w/ Pump Running") + theme(plot.title = element_text(hjust = 0.5)) + 
+  geom_abline(slope = lem$coefficients[2], intercept = lem$coefficients[1]) + 
+  geom_text(aes(200, 750, label = paste("y =",slope, "x", " + ", intercept))) +
+  theme(axis.text.x = element_text(angle = 45))
 
 plot(lem)
-
+```
+```{r}
 #https://winvector.github.io/WVPlots/reference/ScatterHist.html
 
 set.seed(34903490)
@@ -150,7 +188,7 @@ x = water$flux
 frm = data.frame(x=x,y=y)
 WVPlots::ScatterHist(frm, "x", "y",
   title= "Example Fit",
-  smoothmethod = "gam",
+  smoothmethod = "lm",
   contour = TRUE)
 ######
 
@@ -159,4 +197,5 @@ WVPlots::ScatterHist(frm, "x", "y",
 #lines(consolidated_data$time,
       #consolidated_data$out_rate, col = "red")
 ```
+
 

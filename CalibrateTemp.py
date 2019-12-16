@@ -35,7 +35,7 @@ if __name__ == "__main__":
 	current_cal = np.zeros(shape=(N, 1))
 	for i in range(N):
 
-		current_cal[i] = current[i] +0.2*(temp[i] - temp0)
+		current_cal[i] = current[i] + 0.2*(temp[i] - temp0)
 		Icalc[i] = pvarray.current(volts[i], 274.15 + temp[i], irradiance[i])
 		dT = temp[i]-temp0
 		# try:

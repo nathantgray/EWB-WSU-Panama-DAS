@@ -35,7 +35,7 @@ current_cal = current + 0.2*(temp - temp0)
 * The pyranometer data clips irradiance data to no more than 730 W/m^2.
 You can use the irradiance data from the weather station to correct it, however this is made difficult because the weather station data is spaced out by 15 minutes.
 
-## Questions and ideas I have for analysing data:
+## Questions and ideas we have for analysing data:
 
 * (done) Use Pyranometer and Voltage to calculate current and compare to measured
 * (done partial) Calculate water level in tanks and calculate how much overflows
@@ -44,7 +44,10 @@ You can use the irradiance data from the weather station to correct it, however 
 * Calculate if there is excess power available that could be used for other projects in the future such as a cellphone charging station
 * Current vs. Irradiance
 * Efficiency vs. flow rate
-
+* Looking for patterns or events in time series data
+* Predict system functioning for days without DAS data
+* Supervised learning on water use
+* 
 
 ## How times compare between different sources:
 

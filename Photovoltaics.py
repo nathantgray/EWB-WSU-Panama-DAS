@@ -36,7 +36,7 @@ class Photovoltaics:
 		Rsh = self.Rsh
 		I0 = self.a_parameter*self.area * exp(-self.eg/V_T)
 		if Rs == 0:
-			Iout = I_L - I0*(exp(Vc/(n*V_T))-1)-Vc/Rsh
+			Iout = I_L - I0*(exp(Vc/(n*V_T))-1) - Vc/Rsh
 		else:
 			term1 = ((I_L + I0) - Vc/Rsh)/(1+Rs/Rsh)
 			term2 = -n*V_T/Rs
@@ -83,6 +83,18 @@ class Photovoltaics:
 		vmp_model = v_space[np.argmax(p)]
 		imp_model = i_space[np.argmax(p)]
 		return [vmp_model, imp_model]
+
+	def mpp_p(self, temp, flux, resistance = 2):
+		res = 100
+		v_space = np.linspace(0, self.voc, res)
+		i_space = np.zeros(res)
+		for n in range(res):
+			v_space[n] = v_space[n] - i_space[n]*resistance
+		for index, v in enumerate(v_space):
+			i_space[index] = self.current(v, temp, flux)
+		p = v_space*i_space
+		pmax = max(p)
+		return pmax
 # if __name__ == "__main__":
 # 	print('run')
 # 	pv = Photovoltaics(38.7, 9.42, 32.1, 8.92, 285, 1.00, 60)

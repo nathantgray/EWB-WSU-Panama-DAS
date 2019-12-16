@@ -6,7 +6,9 @@ if __name__ == "__main__":
 	print('run')
 	pv = Photovoltaics(38.7, 9.42, 32.1, 8.92, 285, 1.00, 60)
 	pvarray = Photovoltaics(5*38.7, 9.42, 5*32.1, 8.92, 5*285, 1.00, 60*5)
-	pvarray.Rs = pvarray.Rs #+ 2/300 # add 2 ohms for line losses (1ohm/1000ft for 2 wires)
+	# pvarray.Rs = pvarray.Rs  #+ 2/300 # add 2 ohms for line losses (1ohm/1000ft for 2 wires)
+
+	pvarray.a_parameter = pvarray.a_parameter*22
 	temp = 273.15 + 27
 	flux = 672
 	v_meas = 137.77

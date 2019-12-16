@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from Photovoltaics import Photovoltaics
 import statsmodels.api as sm
 import numpy as np
 
@@ -71,24 +72,91 @@ df_dwn = das_df.join(w_df, how='right')
 # plt.ylabel('Pump Flow Rate (gpm)')
 # plt.xlabel('Solar Power (W)')
 # plt.title('Flow Rate vs. Power')
-df_2 = df.loc[df['pump_power'] > 30]
-df_2 = df_2.loc[0 < df['in_rate']]
-df_2 = df_2.loc[df['in_rate'] < 15]
-ax = df_2.plot.scatter(x='pump_power', y='in_rate', xlim=[0, 1300], ylim=[0, 15])
-plt.ylabel('Pump Flow Rate (gpm)')
-plt.xlabel('Pump Power (W)')
-plt.title('Flow Rate vs. Power')
-x = df_2['pump_power']
-xroot = x**(1/2)
-x2 = x**2
-x3 = x**3
-X = pd.DataFrame(data={'x':x, 'xroot':xroot})
-X = sm.add_constant(X)
-y = df_2['in_rate']
-model = sm.OLS(y, X, missing='drop').fit()
-ax.plot(model.model.exog[:, 1], model.fittedvalues, 'r.')
-print(model.summary())
-plt.show()
-df.to_csv('consolidated_data.csv')
-df_dwn.to_csv('consolidate_downsample.csv')
 
+# ~~~~~~ Flow rate vs power ~~~~~
+if False:
+    df_2 = df.loc[df['pump_power'] > 30]
+    df_2 = df_2.loc[0 < df['in_rate']]
+    df_2 = df_2.loc[df['in_rate'] < 15]
+    ax = df_2.plot.scatter(x='pump_power', y='in_rate', xlim=[0, 1300], ylim=[0, 15])
+    plt.ylabel('Pump Flow Rate (gpm)')
+    plt.xlabel('Pump Power (W)')
+    plt.title('Flow Rate vs. Power')
+    x = df_2['pump_power']
+    xroot = x**(1/2)
+    x2 = x**2
+    x3 = x**3
+    X = pd.DataFrame(data={'x':x, 'xroot':xroot})
+    X = sm.add_constant(X)
+    y = df_2['in_rate']
+    model = sm.OLS(y, X, missing='drop').fit()
+    ax.plot(model.model.exog[:, 1], model.fittedvalues, 'r.')
+    print(model.summary())
+    plt.show()
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ~~~~~ Predicted vs measured power ~~~~~
+if False:
+    pvarray = Photovoltaics(5 * 38.7, 9.42, 5 * 32.1, 8.92, 5 * 285, 1.00, 60 * 5)
+    pvarray.a_parameter = pvarray.a_parameter*22
+    df_2 = df.loc[df['pump_power'] > 30]
+    df_2 = df_2.loc[df['flux'] < 710]
+    df_2 = df_2.loc[0 < df['in_rate']]
+
+    ax = df_2.plot.scatter(x='flux', y='power')
+    power_predicted = [pvarray.mpp_p(df_2['temp'][i], df_2['flux'][i]) for i in range(len(df_2['temp']))]
+    print(len(power_predicted))
+    print(len(df_2['flux']))
+    ax = plt.plot(df_2['flux'], power_predicted, c='r')
+    plt.show()
+
+# ~~~~~ Flow vs Power equations ~~~~~
+
+x = np.linspace(0, 1300)
+y = 0.699*x**(1/2) - 0.006615*x - 5.273
+# s2 = 1.5
+y34 = 0.5918*(x)**(1/2) - 0.004*x - 3.6957
+# s3 = 2
+y1 = 0.7105*x**(1/2) - 0.0021*x - 4.8752
+y1_ = 0.6533*x**(1/2) - 0.0005*x - 4.3821
+# y4 = 0.7*(x)**(1/2) - 0.006615*(x) - 5.273
+plt.plot(x, y)
+plt.plot(x, y34*1.2)
+plt.plot(x, y1)
+plt.plot(x, y1_)
+plt.ylim(0, 12)
+plt.show()
+
+
+# ~~~~~~ Flow rate vs power ~~~~~
+if True:
+    df_3 = pd.DataFrame({'y': [1, 2, 5, 7, 10], 'x1': [75, 100, 280, 440, 825], 'x2': [70, 95, 210, 314, 500]})
+    ax = df_3.plot.scatter(x='x2', y='y', xlim=[0, 1300], ylim=[0, 15])
+    plt.ylabel('Pump Flow Rate (gpm)')
+    plt.xlabel('Pump Power (W)')
+    plt.title('Flow Rate vs. Power')
+    x = df_3['x2']
+    xroot = x**(1/2)
+    x2 = x**2
+    x3 = x**3
+    X = pd.DataFrame(data={'x2':x, 'xroot':xroot})
+    X = sm.add_constant(X)
+    y = df_3['y']
+    model = sm.OLS(y, X, missing='drop').fit()
+    ax.plot(model.model.exog[:, 1], model.fittedvalues, 'r.')
+    print(model.summary())
+    # plt.show()
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+#df.to_csv('consolidated_data.csv')
+#df_dwn.to_csv('consolidate_downsample.csv')
+'''
+df_flux_power <- consolidated_data%>%
+  select(current_cal, voltage, vdrop, flux, temp, power, pump_power, in_rate)%>%
+  filter(pump_power>30 & in_rate > 0 & in_rate < 14 & flux < 718)
+plot(df_flux_power$flux, df_flux_power$power)
+sp <- ggplot(df_flux_power, aes(x=flux, y=power)) +
+  geom_point(size = 0.1) + geom_density_2d() + stat_smooth(method='lm', formula=y~x, color='green')
+'''
