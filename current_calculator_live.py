@@ -28,7 +28,7 @@ if __name__ == "__main__":
 	temp = temp_df.iloc[:,2]
 	current = current_df.iloc[:,2]
 	pv = Photovoltaics(38.7, 9.42, 32.1, 8.92, 285, 1.00, 60)
-	pvarray = Photovoltaics(5*38.7, 9.42, 5*32.1, 8.92, 5*285, 1.00, 60*5)
+	pvarray = Photovoltaics(5 * 38.7, 9.42, 5 * 32.1, 8.92, 5 * 285, 1.00, 60 * 5)
 
 	N = len(volts)
 	Icalc = np.zeros(shape=(N,1))

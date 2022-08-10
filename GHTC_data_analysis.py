@@ -15,7 +15,8 @@ das_df.set_axis(['utc_time', 'current_raw', 'voltage', 'flux', 'temp', 'das_temp
 das_df = das_df.assign(time=pd.to_datetime(das_df['utc_time'] + " -0000", format="%m/%d/%Y %H:%M %z"))
 das_df.set_index('time', inplace=True)
 # First calibrate current
-das_df = das_df.assign(current_cal=das_df['current_raw'] + 0.2*(das_df['temp'] - 25))
+# das_df = das_df.assign(current_cal=das_df['current_raw'] + 0.2*(das_df['temp'] - 25))
+das_df = das_df.assign(current_cal=das_df['current_raw'] + 0.0873891*(das_df['das_temp']) - 2.4886157)
 print(das_df.head())
 # current_cal[i] = current[i] +0.2*(temp[i] - temp0)
 # Calculate Power
@@ -111,25 +112,25 @@ if False:
     plt.show()
 
 # ~~~~~ Flow vs Power equations ~~~~~
-
-x = np.linspace(0, 1300)
-y = 0.699*x**(1/2) - 0.006615*x - 5.273
-# s2 = 1.5
-y34 = 0.5918*(x)**(1/2) - 0.004*x - 3.6957
-# s3 = 2
-y1 = 0.7105*x**(1/2) - 0.0021*x - 4.8752
-y1_ = 0.6533*x**(1/2) - 0.0005*x - 4.3821
-# y4 = 0.7*(x)**(1/2) - 0.006615*(x) - 5.273
-plt.plot(x, y)
-plt.plot(x, y34*1.2)
-plt.plot(x, y1)
-plt.plot(x, y1_)
-plt.ylim(0, 12)
-plt.show()
+if False:
+	x = np.linspace(0, 1300)
+	y = 0.699*x**(1/2) - 0.006615*x - 5.273
+	# s2 = 1.5
+	y34 = 0.5918*(x)**(1/2) - 0.004*x - 3.6957
+	# s3 = 2
+	y1 = 0.7105*x**(1/2) - 0.0021*x - 4.8752
+	y1_ = 0.6533*x**(1/2) - 0.0005*x - 4.3821
+	# y4 = 0.7*(x)**(1/2) - 0.006615*(x) - 5.273
+	plt.plot(x, y)
+	plt.plot(x, y34*1.2)
+	plt.plot(x, y1)
+	plt.plot(x, y1_)
+	plt.ylim(0, 12)
+	plt.show()
 
 
 # ~~~~~~ Flow rate vs power ~~~~~
-if True:
+if False:
     df_3 = pd.DataFrame({'y': [1, 2, 5, 7, 10], 'x1': [75, 100, 280, 440, 825], 'x2': [70, 95, 210, 314, 500]})
     ax = df_3.plot.scatter(x='x2', y='y', xlim=[0, 1300], ylim=[0, 15])
     plt.ylabel('Pump Flow Rate (gpm)')
@@ -151,6 +152,7 @@ if True:
 
 
 #df.to_csv('consolidated_data.csv')
+df.to_csv('consolidated_data2.csv')
 #df_dwn.to_csv('consolidate_downsample.csv')
 '''
 df_flux_power <- consolidated_data%>%

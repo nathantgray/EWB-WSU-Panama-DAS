@@ -1,14 +1,16 @@
 from Photovoltaics import *
 import numpy as np
-
+import pandas as pd
 
 if __name__ == "__main__":
 	print('run')
+	file_name = "consolidated_data2.csv"
+	df = pd.read_csv(file_name)
 	pv = Photovoltaics(38.7, 9.42, 32.1, 8.92, 285, 1.00, 60)
-	pvarray = Photovoltaics(5*38.7, 9.42, 5*32.1, 8.92, 5*285, 1.00, 60*5)
+	pvarray = Photovoltaics(voc=5 * 38.7, isc=9.42, vmp=5 * 32.1, imp=8.92, pmax=5 * 285, n=1.00, nseries=60 * 5)
 	# pvarray.Rs = pvarray.Rs  #+ 2/300 # add 2 ohms for line losses (1ohm/1000ft for 2 wires)
 
-	pvarray.a_parameter = pvarray.a_parameter*22
+	pvarray.a_parameter = pvarray.a_parameter
 	temp = 273.15 + 27
 	flux = 672
 	v_meas = 137.77
@@ -35,4 +37,5 @@ if __name__ == "__main__":
 	plt.legend()
 	plt.show()
 	print(pvarray.voltage(0, temp, flux))
+	print(pvarray.mpp_p(df['temp']+273.15, df['flux']))
 	print('done')

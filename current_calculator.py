@@ -5,7 +5,7 @@ if __name__ == "__main__":
 	print('run')
 
 	pv = Photovoltaics(38.7, 9.42, 32.1, 8.92, 285, 1.00, 60)
-	pvarray = Photovoltaics(5*38.7, 9.42, 5*32.1, 8.92, 5*285, 1.00, 60*5)
+	pvarray = Photovoltaics(5 * 38.7, 9.42, 5 * 32.1, 8.92, 5 * 285, 1.00, 60 * 5)
 	file = "DAS_temp-rad-volt.xlsx"
 	df = pd.read_excel(file, sheet_name='Sheet4', header=0, index_col=0)
 	#writer = pd.ExcelWriter(file)

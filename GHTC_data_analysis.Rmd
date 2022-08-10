@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 ```{r}
 library(MASS)
@@ -19,6 +21,36 @@ library(WVPlots)
 consolidated_data <- read_csv("consolidated_data.csv")
 head(consolidated_data)
 ```
+```{r}
+# Calibration of Current (not used in project)
+df_cal <- consolidated_data %>%
+  dplyr::select(current_raw, temp, das_temp, voltage, flux, current_cal)%>%
+  filter(current_raw > -1, voltage < 0.9, current_raw < 0.9)%>%
+  mutate(dt = das_temp)%>%
+  mutate(dI = -current_raw)
+
+df_cal_cor <- df_cal%>%
+  cor()
+  
+
+cal_fit = lm(dI ~ dt, df_cal)
+plot(cal_fit)
+plot(df_cal$dt, df_cal$dI)
+summary(cal_fit)
+b = cal_fit[["coefficients"]][["(Intercept)"]]
+m = cal_fit[["coefficients"]][["dt"]]
+plot(df_cal$current_raw + df_cal$dt*m + b)
+plot(df_cal$current_cal)
+sd(df_cal$current_raw + df_cal$dt*m + b)
+consolidated_data <- consolidated_data%>%
+  mutate(current_cal2 = consolidated_data$current_raw + (consolidated_data$das_temp*m + b))%>%
+  mutate(power2 = current_cal2*voltage)
+xmin = 17200
+xmax = 19500
+plot(consolidated_data$current_cal2[xmin:xmax])
+plot(consolidated_data$current_cal[xmin:xmax])
+plot(consolidated_data$current_raw[xmin:xmax])
+```
 
 ```{r}
 result <- consolidated_data %>%
@@ -34,25 +66,16 @@ eda <- consolidated_data %>%
 
 plot(eda)
 ```
-```{r}
-# Calibration of Current (not actually used)
-df_cal <- consolidated_data %>%
-  dplyr::select(current_raw, temp, voltage)%>%
-  filter(current_raw > -1, voltage < 0.5, current_raw < 0.7)%>%
-  mutate(dt = 27 - temp + 0.2868533)
-  
-cal_fit = lm(current_raw ~ dt, df_cal)
-plot(cal_fit)
-plot(df_cal$current_raw, df_cal$dt)
-```
+
 
 
 ```{r}
 # Power Loss in wire versus power generated
 dfpv <- consolidated_data%>%
-  select(current_cal, voltage, flux, temp)
+  select(current_cal, voltage, flux, temp, in_rate)%>%
+  filter(flux < 710, in_rate > 0)
 
-outliers <- which(dfpv$current_cal < -1)
+outliers <- which(dfpv$current_cal < 0)
 dfpv$current_cal[outliers] <- 0
 ggplot(dfpv, aes(voltage, current_cal, col=flux)) + geom_point() + scale_color_viridis()
 ```

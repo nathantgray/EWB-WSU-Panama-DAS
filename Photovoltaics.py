@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from scipy.special import lambertw
 class Photovoltaics:
-	def __init__(self, voc, isc, vmp, imp, pmax, n, nseries):
+	def __init__(self, voc=5 * 38.7, isc=9.42, vmp=5 * 32.1, imp=8.92, pmax=5 * 285, n=1.00, nseries=60 * 5):
 		self.voc = voc
 		self.isc = isc
 		self.vmp = vmp
@@ -84,17 +84,35 @@ class Photovoltaics:
 		imp_model = i_space[np.argmax(p)]
 		return [vmp_model, imp_model]
 
-	def mpp_p(self, temp, flux, resistance = 2):
+	def mpp_p(self, temp, flux, resistance=2):
 		res = 100
-		v_space = np.linspace(0, self.voc, res)
-		i_space = np.zeros(res)
-		for n in range(res):
-			v_space[n] = v_space[n] - i_space[n]*resistance
-		for index, v in enumerate(v_space):
-			i_space[index] = self.current(v, temp, flux)
-		p = v_space*i_space
-		pmax = max(p)
-		return pmax
+		if isinstance(temp, float) and isinstance(flux, float):
+			v_space = np.linspace(0, self.voc, res)
+			i_space = np.zeros(res)
+			for n in range(res):
+				v_space[n] = v_space[n] - i_space[n]*resistance
+			for index, v in enumerate(v_space):
+				i_space[index] = self.current(v, temp, flux)
+			p = v_space*i_space
+			pmax = max(p)
+			return pmax
+		else: #  assume both temp and flux are lists
+			flux = np.array(flux)
+			temp = np.array(temp)
+			pmax = np.zeros(flux.shape)
+			for m, f in enumerate(flux):
+				v_space = np.linspace(0, self.voc, res)
+				i_space = np.zeros(res)
+				t = temp[m]
+				for n in range(res):
+					v_space[n] = v_space[n] - self.current(v_space[n], t, f)*resistance
+				for index, v in enumerate(v_space):
+					i_space[index] = self.current(v, t, f)
+				p = v_space*i_space
+				pmax[m] = max(p)
+			return pmax
+
+
 # if __name__ == "__main__":
 # 	print('run')
 # 	pv = Photovoltaics(38.7, 9.42, 32.1, 8.92, 285, 1.00, 60)
